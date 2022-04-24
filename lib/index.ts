@@ -37,9 +37,9 @@ export default class Blobify {
         });
 
         // set default variables
-        this.kinet.set("height", 40);
-        this.kinet.set("width", 40);
-        this.kinet.set("radius", 100);
+        this.kinet.set("width",  this.options.size);
+        this.kinet.set("height", this.options.size);
+        this.kinet.set("radius", this.options.size / 2);
         this.kinet.set("x", 0);
         this.kinet.set("y", 0);
 
