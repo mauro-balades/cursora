@@ -47,8 +47,8 @@ export default class Blobify {
         this.kinet.on("tick", this.kinet_tick.bind(this));
 
         // add event listeners
-        document.addEventListener("mouseout",  this.mouseout.bind(this), false);
-        document.addEventListener("mouseleave",  this.mouseout.bind(this), false);
+        document.addEventListener("mouseout",   this.mouseout.bind(this));
+        document.addEventListener("mouseleave", this.mouseout.bind(this));
         document.addEventListener("mousemove", this.mousemove.bind(this));
         document.addEventListener("mouseover", this.mouseover.bind(this));
     }
@@ -89,12 +89,13 @@ export default class Blobify {
                 ? parseInt(radius_attr)
                 : this.options.size / 2;
 
+            // TODO: allow customization for offsets
             let offset = 15;
             let h = height + offset;
             let w = width + offset;
 
             this.focusedElement = element;
-            this.kinet.animate("x", (x - window.innerWidth / 2  - (offset/2)));
+            this.kinet.animate("x", x - window.innerWidth / 2  - (offset/2));
             this.kinet.animate("y", y - window.innerHeight / 2 - (offset/2));
             this.kinet.animate("height", h);
             this.kinet.animate("width", w);
@@ -108,6 +109,7 @@ export default class Blobify {
         this.cursor.style.height = `${instances.height.current}px`;
         this.cursor.style.width = `${instances.width.current}px`;
         this.cursor.style.borderRadius = `${instances.radius.current}px`;
+        this.cursor.style.margin = this.focusedElement ? '0 0 0 5px' : '-20px 0 0 -20px';
         this.cursor.style.transform = `translate3d(${instances.x.current}px, ${
             instances.y.current
         }px, 0) rotateX(${instances.x.velocity / 2}deg) rotateY(${
@@ -125,7 +127,7 @@ export default class Blobify {
         this.cursor.style.mixBlendMode  = 'multiply';
         this.cursor.style.position      = 'absolute';
         this.cursor.style.background    = this.options.bg;
-        this.cursor.style.margin        = '0 0 0 5px';
+        this.cursor.style.margin        = this.focusedElement ? '0 0 0 5px' : '-20px 0 0 -20px';
         this.cursor.style.opacity       = this.options.opacity;
         this.cursor.style.width         = `${this.options.size}px`;
         this.cursor.style.height        = `${this.options.size}px`;
