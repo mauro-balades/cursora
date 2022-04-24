@@ -1,5 +1,6 @@
 // @ts-ignore
 import { default as Kinet } from "kinet";
+import { textChangeRangeIsUnchanged } from "typescript";
 
 export default class Blobify {
     public readonly defaultOptions = {
@@ -46,12 +47,25 @@ export default class Blobify {
         this.kinet.on("tick", this.kinet_tick.bind(this));
 
         // add event listeners
+        document.addEventListener("mouseout",  this.mouseout.bind(this), false);
+        document.addEventListener("mouseleave",  this.mouseout.bind(this), false);
         document.addEventListener("mousemove", this.mousemove.bind(this));
-        document.addEventListener("mouseout", this.mousemove.bind(this));
         document.addEventListener("mouseover", this.mouseover.bind(this));
     }
 
     // Events
+
+    private mouseout(event: MouseEvent) {
+
+        if (event.target) {
+            const element = (event.target as HTMLElement).closest(
+                this.options.focusableElements
+            ) as HTMLElement;
+
+            if (element) {
+            }
+        }
+    }
 
     private mousemove(event: MouseEvent) {
         if (!this.focusedElement) {
@@ -75,12 +89,13 @@ export default class Blobify {
                 ? parseInt(radius_attr)
                 : this.options.size / 2;
 
-            let h = height + 10;
-            let w = width + 10;
+            let offset = 15;
+            let h = height + offset;
+            let w = width + offset;
 
             this.focusedElement = element;
-            this.kinet.animate("x", x - window.innerWidth / 2 + 15);
-            this.kinet.animate("y", y - window.innerHeight / 2 + 15);
+            this.kinet.animate("x", (x - window.innerWidth / 2  - (offset/2)));
+            this.kinet.animate("y", y - window.innerHeight / 2 - (offset/2));
             this.kinet.animate("height", h);
             this.kinet.animate("width", w);
 
@@ -110,7 +125,7 @@ export default class Blobify {
         this.cursor.style.mixBlendMode  = 'multiply';
         this.cursor.style.position      = 'absolute';
         this.cursor.style.background    = this.options.bg;
-        this.cursor.style.margin        = '-20px 0 0 -20px';
+        this.cursor.style.margin        = '0 0 0 5px';
         this.cursor.style.opacity       = this.options.opacity;
         this.cursor.style.width         = `${this.options.size}px`;
         this.cursor.style.height        = `${this.options.size}px`;
