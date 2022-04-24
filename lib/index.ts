@@ -9,19 +9,19 @@ export default class Blobify {
             width: 20,
             height: 20
         },
-        radius: 50
+        radius: 50,
     };
 
+    private readonly focusableElements = '[data-blobify], a:not([data-no-blobify]), button:not([data-no-blobify]), [data-blobify-tooltip]';
     private cursor: HTMLDivElement;
     private kinet: Kinet;
 
-    private options: Object;
+    private focusedElement: HTMLElement | null = null;
 
     constructor(options = {}) {
 
         // Merge default configuration
         Object.assign({}, this.defaultOptions, options)
-        this.options = options;
 
         // Create a new HTML element and append it to the document's body
         this.cursor = document.createElement("div");
@@ -33,26 +33,68 @@ export default class Blobify {
         this.kinet = new Kinet({
             acceleration: 0.06,
             friction: 0.20,
-            names: ["x", "y"],
+            names: ["x", "y", "height", "width", "radius"],
         });
+
+        // set default variables
+        this.kinet.set('height', 40);
+        this.kinet.set('width', 40);
+        this.kinet.set('radius', 100);
+        this.kinet.set('x', 0);
+        this.kinet.set('y', 0);
 
         // set handler on kinet tick event
         this.kinet.on('tick', this.kinet_tick.bind(this));
 
-        // call kinet animate method on mousemove
+        // add event listeners
         document.addEventListener('mousemove', this.mousemove.bind(this));
+        document.addEventListener("mouseout", this.mousemove.bind(this));
+        document.addEventListener("mouseover", this.mouseover.bind(this));
     }
 
     // Events
 
     private mousemove(event: MouseEvent) {
-        this.kinet.animate('x', event.clientX - window.innerWidth/2);
-        this.kinet.animate('y', event.clientY - window.innerHeight/2);
+
+        if (!this.focusedElement) {
+            this.kinet.animate('x', event.clientX - window.innerWidth/2);
+            this.kinet.animate('y', event.clientY - window.innerHeight/2);
+        }
+    }
+
+    private mouseover(event: MouseEvent) {
+        const element = (event.target as HTMLElement).closest(
+            // @ts-ignore
+            this.focusableElements
+        ) as HTMLElement;
+
+        if (element) {
+            // @ts-ignore
+            const { width, height, x, y } = element.getBoundingClientRect();
+
+            let radius_attr = element.getAttribute('data-blobify-radius');
+            let radius = radius_attr ? parseInt(radius_attr) : 0; // TODO: '... : (options.size / 2)'
+
+            let h = height + 10;
+            let w = width + 10;
+
+            this.focusedElement = element;
+            this.kinet.animate('x', (x - (window.innerWidth/2) + 15));
+            this.kinet.animate('y', (y - window.innerHeight/2) + 15);
+            this.kinet.animate('height', h);
+            this.kinet.animate('width', w);
+            
+            this.kinet.set('radius', radius);
+        }
+
     }
 
     // Kinet events
     private kinet_tick(instances: any) {
         this.cursor.style.transform = `translate3d(${ (instances.x.current) }px, ${ (instances.y.current) }px, 0) rotateX(${ (instances.x.velocity/2) }deg) rotateY(${ (instances.y.velocity/2) }deg)`;
+        this.cursor.style.height = `${instances.height.current}px`;
+        this.cursor.style.width = `${instances.width.current}px`;
+        this.cursor.style.borderRadius = `${instances.radius.current}px`;
     }
 
     // styles
@@ -68,7 +110,7 @@ export default class Blobify {
         this.cursor.style.left = '50%';
         this.cursor.style.pointerEvents = 'none';
         this.cursor.style.mixBlendMode = 'multiply';
-        this.cursor.style.zIndex = '10';
+        this.cursor.style.zIndex = '-1';
     }
 }
 
