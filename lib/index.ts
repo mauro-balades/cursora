@@ -74,7 +74,7 @@ export default class Blobify {
             const { width, height, x, y } = element.getBoundingClientRect();
 
             let radius_attr = element.getAttribute('data-blobify-radius');
-            let radius = radius_attr ? parseInt(radius_attr) : 0; // TODO: '... : (options.size / 2)'
+            let radius = radius_attr ? parseInt(radius_attr) : this.options.size / 2;
 
             let h = height + 10;
             let w = width + 10;
