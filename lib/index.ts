@@ -1,5 +1,6 @@
 // @ts-ignore
 import { default as Kinet } from "kinet";
+import { BlockScopeAwareRuleWalker } from "tslint";
 import { textChangeRangeIsUnchanged } from "typescript";
 
 export default class Blobify {
@@ -25,6 +26,7 @@ export default class Blobify {
         radius: 20,
         opacity: 1,
         type: this.types.normal,
+        dotColour: "#000"
     };
 
     private readonly focusableElements =
@@ -34,6 +36,9 @@ export default class Blobify {
 
     private focusedElement: HTMLElement | null = null;
     private options: any;
+
+    private globalStyles: HTMLStyleElement;
+    private readonly dot: any = (colour: string = '#000') => `<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill-rule="evenodd" fill="${colour}"/></svg>`;
 
     constructor(options = {}) {
         // Merge default configuration
@@ -47,9 +52,15 @@ export default class Blobify {
         if (this.options.type['acceleration'] === undefined ||
             this.options.type['friction'] === undefined) {
                 console.error('Type is not valid')
-            }
+        }
+
+        // Create global styles
+        this.globalStyles = document.createElement('style');
+        this.globalStyles.setAttribute('data-blobify-global-styles', '');
+        document.head.appendChild(this.globalStyles);
 
         // Style the cursor
+        this.cursor_dot()
         this.circle_default();
 
         this.kinet = new Kinet({
@@ -62,32 +73,17 @@ export default class Blobify {
         this.kinet.set("height", this.options.size);
         this.kinet.set("radius", this.options.size / 2);
         this.kinet.set("x", 0);
-        this.kinet.set("y", 0);
+        this.kinet.set("y", -window.innerHeight);
 
         // set handler on kinet tick event
         this.kinet.on("tick", this.kinet_tick.bind(this));
 
         // add event listeners
-        document.addEventListener("mouseout",   this.mouseout.bind(this));
-        document.addEventListener("mouseleave", this.mouseout.bind(this));
         document.addEventListener("mousemove", this.mousemove.bind(this));
         document.addEventListener("mouseover", this.mouseover.bind(this));
     }
 
     // Events
-
-    private mouseout(event: MouseEvent) {
-
-        if (event.target) {
-            const element = (event.target as HTMLElement).closest(
-                this.options.focusableElements
-            ) as HTMLElement;
-
-            if (element) {
-                // TODO: mouseout does not work
-            }
-        }
-    }
 
     private mousemove(event: MouseEvent) {
         if (!this.focusedElement) {
@@ -101,6 +97,7 @@ export default class Blobify {
             console.log(element)
             const { width, height, x, y } = element.getBoundingClientRect();
 
+            // prettier-ignore
             if (event.clientX > (x + width)  ||
                 event.clientY > (y + height) ||
                 event.clientX < x            ||
@@ -116,6 +113,7 @@ export default class Blobify {
                 this.kinet.set("radius", this.options.radius);
 
                 this.focusedElement = null;
+                this.cursor_dot();
             }
         }
     }
@@ -147,6 +145,7 @@ export default class Blobify {
             this.kinet.animate("width", w);
 
             this.kinet.set("radius", radius);
+            this.cursor_dot(true);
         }
     }
 
@@ -155,7 +154,7 @@ export default class Blobify {
         this.cursor.style.height = `${instances.height.current}px`;
         this.cursor.style.width = `${instances.width.current}px`;
         this.cursor.style.borderRadius = `${instances.radius.current}px`;
-        this.cursor.style.margin = this.focusedElement ? '0 0 0 5px' : '-20px 0 0 -20px';
+        this.cursor.style.margin = this.focusedElement ? '0 0 0 5px' : '-20px 0 0 -15px';
         this.cursor.style.transform = `translate3d(${instances.x.current}px, ${
             instances.y.current
         }px, 0) rotateX(${instances.x.velocity / 2}deg) rotateY(${
@@ -169,14 +168,40 @@ export default class Blobify {
         this.cursor.style.zIndex        = '-1';
         this.cursor.style.top           = '50%';
         this.cursor.style.left          = '50%';
+        this.cursor.style.cursor        = 'none';
         this.cursor.style.pointerEvents = 'none';
         this.cursor.style.mixBlendMode  = 'multiply';
         this.cursor.style.position      = 'absolute';
         this.cursor.style.background    = this.options.bg;
-        this.cursor.style.margin        = this.focusedElement ? '0 0 0 5px' : '-20px 0 0 -20px';
+        this.cursor.style.margin        = this.focusedElement ? '0 0 0 5px' : '-20px 0 0 -15px';
         this.cursor.style.opacity       = this.options.opacity;
         this.cursor.style.width         = `${this.options.size}px`;
         this.cursor.style.height        = `${this.options.size}px`;
         this.cursor.style.borderRadius  = `${this.options.radius}`;
+    }
+
+    private cursor_dot(hidden: boolean = false) {
+        this.globalStyles.innerHTML = "";
+        this.globalStyles.appendChild(
+            document.createTextNode('* {cursor: inherit}')
+        );
+
+        if (!hidden) {
+            this.globalStyles.appendChild(
+                document.createTextNode(
+                    `html { cursor: url(data:image/svg+xml;base64,${btoa(
+                        this.dot(this.options.dotColour)
+                    )}) 4 4, auto;}`
+                )
+            );
+
+            return
+        }
+
+        this.globalStyles.appendChild(
+            document.createTextNode(
+                `html { cursor: none; }`
+            )
+        );
     }
 }
