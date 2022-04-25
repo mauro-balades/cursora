@@ -63,6 +63,7 @@ export default class Blobify {
             ) as HTMLElement;
 
             if (element) {
+                // TODO: mouseout does not work
             }
         }
     }
@@ -71,6 +72,30 @@ export default class Blobify {
         if (!this.focusedElement) {
             this.kinet.animate("x", event.clientX - window.innerWidth / 2);
             this.kinet.animate("y", event.clientY - window.innerHeight / 2);
+        } else {
+            // @ts-ignore
+            let element = this.focusedElement as HTMLElement;
+
+            // @ts-ignore
+            console.log(element)
+            const { width, height, x, y } = element.getBoundingClientRect();
+
+            if (event.clientX > (x + width)  ||
+                event.clientY > (y + height) ||
+                event.clientX < x            ||
+                event.clientY < y            ) {
+                this.circle_default();
+
+                this.kinet.animate("x", event.clientX - window.innerWidth / 2);
+                this.kinet.animate("y", event.clientY - window.innerHeight / 2);
+
+                this.kinet.animate("height", this.options.size);
+                this.kinet.animate("width", this.options.size);
+
+                this.kinet.set("radius", this.options.radius);
+
+                this.focusedElement = null;
+            }
         }
     }
 
