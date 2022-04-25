@@ -26,7 +26,7 @@ export default class Blobify {
         radius: 20,
         opacity: 1,
         type: this.types.normal,
-        dotColour: "#000"
+        dotColour: "#000",
     };
 
     private readonly focusableElements =
@@ -97,11 +97,14 @@ export default class Blobify {
             console.log(element)
             const { width, height, x, y } = element.getBoundingClientRect();
 
+            // TODO: allow customization for offsets
+            let offset = 15;
+
             // prettier-ignore
             if (event.clientX > (x + width)  ||
                 event.clientY > (y + height) ||
-                event.clientX < x            ||
-                event.clientY < y            ) {
+                event.clientX <( x - offset) ||
+                event.clientY < (y - offset)  ) {
                 this.circle_default();
 
                 this.kinet.animate("x", event.clientX - window.innerWidth / 2);
@@ -139,7 +142,7 @@ export default class Blobify {
             let w = width + offset;
 
             this.focusedElement = element;
-            this.kinet.animate("x", x - window.innerWidth / 2  - (offset/2));
+            this.kinet.animate("x", x - window.innerWidth / 2  - (offset/4));
             this.kinet.animate("y", y - window.innerHeight / 2 - (offset/2));
             this.kinet.animate("height", h);
             this.kinet.animate("width", w);
@@ -171,9 +174,9 @@ export default class Blobify {
         this.cursor.style.cursor        = 'none';
         this.cursor.style.pointerEvents = 'none';
         this.cursor.style.mixBlendMode  = 'multiply';
-        this.cursor.style.position      = 'absolute';
+        this.cursor.style.position      = 'fixed';
         this.cursor.style.background    = this.options.bg;
-        this.cursor.style.margin        = this.focusedElement ? '0 0 0 5px' : '-20px 0 0 -15px';
+        this.cursor.style.margin        = this.focusedElement ? '0' : '-20px 0 0 -15px';
         this.cursor.style.opacity       = this.options.opacity;
         this.cursor.style.width         = `${this.options.size}px`;
         this.cursor.style.height        = `${this.options.size}px`;
