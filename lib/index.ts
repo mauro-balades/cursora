@@ -3,12 +3,28 @@ import { default as Kinet } from "kinet";
 import { textChangeRangeIsUnchanged } from "typescript";
 
 export default class Blobify {
+
+    public readonly types = {
+        normal: {
+            acceleration: 0.1,
+            friction: 0.35,
+        },
+        bouncy: {
+            acceleration: 0.1,
+            friction: 0.28,
+        },
+        slow: {
+            acceleration: 0.06,
+            friction: 0.35,
+        },
+    }
+
     public readonly defaultOptions = {
         size: 40,
         bg: "#dee2e6",
         radius: 20,
         opacity: 1,
-        type: "normal",
+        type: this.types.normal,
     };
 
     private readonly focusableElements =
@@ -27,12 +43,17 @@ export default class Blobify {
         this.cursor = document.createElement("div");
         document.body.appendChild(this.cursor);
 
+        // Check if the type preset is valid
+        if (this.options.type['acceleration'] === undefined ||
+            this.options.type['friction'] === undefined) {
+                console.error('Type is not valid')
+            }
+
         // Style the cursor
         this.circle_default();
 
         this.kinet = new Kinet({
-            acceleration: 0.06,
-            friction: 0.2,
+            ...this.options.type,
             names: ["x", "y", "height", "width", "radius"],
         });
 
