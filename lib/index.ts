@@ -94,7 +94,6 @@ export default class Blobify {
             let element = this.focusedElement as HTMLElement;
 
             // @ts-ignore
-            console.log(element)
             const { width, height, x, y } = element.getBoundingClientRect();
 
             // TODO: allow customization for offsets
@@ -137,13 +136,14 @@ export default class Blobify {
                 : this.options.size / 2;
 
             // TODO: allow customization for offsets
-            let offset = 15;
-            let h = height + offset;
-            let w = width + offset;
+            let offsetX = 15;
+            let offsetY = 10;
+            let h = height + offsetY * 2;
+            let w = width + offsetX * 2;
 
             this.focusedElement = element;
-            this.kinet.animate("x", x - window.innerWidth / 2  - (offset/4));
-            this.kinet.animate("y", y - window.innerHeight / 2 - (offset/2));
+            this.kinet.animate("x", -(window.innerWidth / 2 - (x - offsetX/2)));
+            this.kinet.animate("y", (y - offsetY) - window.innerHeight / 2);
             this.kinet.animate("height", h);
             this.kinet.animate("width", w);
 
@@ -157,7 +157,7 @@ export default class Blobify {
         this.cursor.style.height = `${instances.height.current}px`;
         this.cursor.style.width = `${instances.width.current}px`;
         this.cursor.style.borderRadius = `${instances.radius.current}px`;
-        this.cursor.style.margin = this.focusedElement ? '0 0 0 5px' : '-20px 0 0 -15px';
+        this.cursor.style.margin = this.focusedElement ? `0 0 0 0` : '-20px 0 0 -15px';
         this.cursor.style.transform = `translate3d(${instances.x.current}px, ${
             instances.y.current
         }px, 0) rotateX(${instances.x.velocity / 2}deg) rotateY(${
@@ -173,10 +173,12 @@ export default class Blobify {
         this.cursor.style.left          = '50%';
         this.cursor.style.cursor        = 'none';
         this.cursor.style.pointerEvents = 'none';
-        this.cursor.style.mixBlendMode  = 'multiply';
         this.cursor.style.position      = 'fixed';
+        this.cursor.style.overflow      = 'visible';
+        this.cursor.style.mixBlendMode  = 'multiply';
+        this.cursor.style.willChange    = 'transform';
         this.cursor.style.background    = this.options.bg;
-        this.cursor.style.margin        = this.focusedElement ? '0' : '-20px 0 0 -15px';
+        this.cursor.style.margin        = this.focusedElement ? '0' : '-20px 0 0 -20px';
         this.cursor.style.opacity       = this.options.opacity;
         this.cursor.style.width         = `${this.options.size}px`;
         this.cursor.style.height        = `${this.options.size}px`;
