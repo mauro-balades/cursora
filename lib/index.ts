@@ -3,7 +3,7 @@ import { default as Kinet } from "kinet";
 
 export default class Blobify {
 
-    public readonly types = {
+    public static readonly types = {
         normal: {
             acceleration: 0.1,
             friction: 0.35,
@@ -23,8 +23,9 @@ export default class Blobify {
         bg: "#dee2e6",
         radius: 20,
         opacity: 1,
-        type: this.types.normal,
+        type: Blobify.types.normal,
         dotColour: "#000",
+        magnetic: false,
     };
 
     private readonly focusableElements =
@@ -151,7 +152,7 @@ export default class Blobify {
             this.kinet.set("radius", radius);
             this.cursor_dot(true);
 
-            if (!this.magnet_effect) {
+            if (!this.magnet_effect && (this.options.magnetic || element.hasAttribute("data-blobify-magnetic"))) {
                 this.magnet_effect = true;
                 console.log("hello 2")
 
