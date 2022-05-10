@@ -21,7 +21,6 @@ export default class Blobify {
     public readonly defaultOptions = {
         size: 40,
         bg: "#dee2e6",
-        radius: 20,
         opacity: 1,
         type: Blobify.types.normal,
         dotColour: "#000",
@@ -114,7 +113,7 @@ export default class Blobify {
                 this.kinet.animate("height", this.options.size);
                 this.kinet.animate("width", this.options.size);
 
-                this.kinet.set("radius", this.options.radius);
+                this.kinet.set("radius", this.options.size / 2);
 
                 this.focusedElement = null;
                 this.cursor_dot();
@@ -180,7 +179,7 @@ export default class Blobify {
         this.cursor.style.height = `${instances.height.current}px`;
         this.cursor.style.width = `${instances.width.current}px`;
         this.cursor.style.borderRadius = `${instances.radius.current}px`;
-        this.cursor.style.margin = this.focusedElement ? `0 0 0 0` : '-20px 0 0 -15px';
+        this.cursor.style.margin = this.focusedElement ? `0` : `-${this.options.size / 2}px 0 0 -${(this.options.size / 3)}px`;
         this.cursor.style.transform = `translate3d(${instances.x.current}px, ${
             instances.y.current
         }px, 0) rotateX(${instances.x.velocity / 2}deg) rotateY(${
@@ -201,11 +200,11 @@ export default class Blobify {
         this.cursor.style.mixBlendMode  = 'multiply';
         this.cursor.style.willChange    = 'transform';
         this.cursor.style.background    = this.options.bg;
-        this.cursor.style.margin        = this.focusedElement ? '0' : '-20px 0 0 -20px';
+        this.cursor.style.margin        = this.focusedElement ? '0' : `-${this.options.size / 2}px 0 0 -${this.options.size / 2}px`;
         this.cursor.style.opacity       = this.options.opacity;
         this.cursor.style.width         = `${this.options.size}px`;
         this.cursor.style.height        = `${this.options.size}px`;
-        this.cursor.style.borderRadius  = `${this.options.radius}`;
+        this.cursor.style.borderRadius  = `${this.options.size / 2}`;
     }
 
     private cursor_dot(hidden: boolean = false) {
