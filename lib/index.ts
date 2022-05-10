@@ -1,7 +1,5 @@
 // @ts-ignore
 import { default as Kinet } from "kinet";
-import { BlockScopeAwareRuleWalker } from "tslint";
-import { textChangeRangeIsUnchanged } from "typescript";
 
 export default class Blobify {
 
@@ -39,6 +37,8 @@ export default class Blobify {
 
     private globalStyles: HTMLStyleElement;
     private readonly dot: any = (colour: string = '#000') => `<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill-rule="evenodd" fill="${colour}"/></svg>`;
+
+    private magnet_effect: boolean = false;
 
     constructor(options = {}) {
         // Merge default configuration
@@ -90,7 +90,8 @@ export default class Blobify {
             this.kinet.animate("x", event.clientX - window.innerWidth / 2);
             this.kinet.animate("y", event.clientY - window.innerHeight / 2);
         } else {
-            // @ts-ignore
+            this.magnet_effect = false;
+
             let element = this.focusedElement as HTMLElement;
 
             // @ts-ignore
@@ -136,19 +137,40 @@ export default class Blobify {
                 : this.options.size / 2;
 
             // TODO: allow customization for offsets
-            let offsetX = 15;
+            let offsetX = 10;
             let offsetY = 10;
             let h = height + offsetY * 2;
             let w = width + offsetX * 2;
 
             this.focusedElement = element;
-            this.kinet.animate("x", -(window.innerWidth / 2 - (x - offsetX/2)));
+            this.kinet.animate("x", (x - offsetX / 2) - window.innerWidth / 2);
             this.kinet.animate("y", (y - offsetY) - window.innerHeight / 2);
             this.kinet.animate("height", h);
-            this.kinet.animate("width", w);
+            this.kinet.animate("width", w + offsetX/2);
 
             this.kinet.set("radius", radius);
             this.cursor_dot(true);
+
+            if (!this.magnet_effect) {
+                this.magnet_effect = true;
+                console.log("hello 2")
+
+                element.addEventListener("mousemove", (e) => {
+                    const el_pos = element.getBoundingClientRect();
+                    const el_x = e.pageX - el_pos.left - el_pos.width / 2;
+                    const el_y = e.pageY - el_pos.top - el_pos.height / 2;
+
+                    this.kinet.animate("x", (el_pos.left - offsetX / 2) - window.innerWidth / 2);
+                    this.kinet.animate("y", (el_pos.top - offsetY) - window.innerHeight / 2);
+
+                    element.style.transform = `translate(${el_x * 0.5}px, ${el_y * 0.5}px)`;
+                })
+
+                element.addEventListener("mouseout", (e) => {
+                    const el_pos = element.getBoundingClientRect();
+                    element.style.transform = `translate(0px, 0px)`;
+                })
+            }
         }
     }
 
