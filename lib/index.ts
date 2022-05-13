@@ -2,7 +2,6 @@
 import { default as Kinet } from "kinet";
 
 export default class Blobify {
-
     public static readonly types = {
         normal: {
             acceleration: 0.1,
@@ -16,14 +15,14 @@ export default class Blobify {
             acceleration: 0.06,
             friction: 0.35,
         },
-    }
+    };
 
     public readonly defaultOptions = {
         size: 40,
         bg: "#dee2e6",
         opacity: 1,
         type: Blobify.types.normal,
-        dotColour: "#000",
+        dot: "#000",
         magnetic: false,
     };
 
@@ -36,7 +35,8 @@ export default class Blobify {
     private options: any;
 
     private globalStyles: HTMLStyleElement;
-    private readonly dot: any = (colour: string = '#000') => `<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill-rule="evenodd" fill="${colour}"/></svg>`;
+    private readonly dot: any = () =>
+        `<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill-rule="evenodd" fill="${this.options.dot}"/></svg>`;
 
     private magnet_effect: boolean = false;
 
@@ -49,18 +49,20 @@ export default class Blobify {
         document.body.appendChild(this.cursor);
 
         // Check if the type preset is valid
-        if (this.options.type['acceleration'] === undefined ||
-            this.options.type['friction'] === undefined) {
-                console.error('Type is not valid')
+        if (
+            this.options.type["acceleration"] === undefined ||
+            this.options.type["friction"] === undefined
+        ) {
+            console.error("Type is not valid");
         }
 
         // Create global styles
-        this.globalStyles = document.createElement('style');
-        this.globalStyles.setAttribute('data-blobify-global-styles', '');
+        this.globalStyles = document.createElement("style");
+        this.globalStyles.setAttribute("data-blobify-global-styles", "");
         document.head.appendChild(this.globalStyles);
 
         // Style the cursor
-        this.cursor_dot()
+        this.cursor_dot();
         this.circle_default();
 
         this.kinet = new Kinet({
@@ -69,7 +71,7 @@ export default class Blobify {
         });
 
         // set default variables
-        this.kinet.set("width",  this.options.size);
+        this.kinet.set("width", this.options.size);
         this.kinet.set("height", this.options.size);
         this.kinet.set("radius", this.options.size / 2);
         this.kinet.set("x", 0);
@@ -129,7 +131,8 @@ export default class Blobify {
 
         if (element) {
             // @ts-ignore
-            const { width, height, x, y } = element.getBoundingClientRect();
+            const { width, height, left, top } =
+                element.getBoundingClientRect();
 
             let radius_attr = element.getAttribute("data-blobify-radius");
             let radius = radius_attr
@@ -143,47 +146,89 @@ export default class Blobify {
             let w = width + offsetX * 2;
 
             this.focusedElement = element;
-            this.kinet.animate("x", (x - offsetX / 2) - window.innerWidth / 2);
-            this.kinet.animate("y", (y - offsetY) - window.innerHeight / 2);
+            this.kinet.animate("x", left - offsetX / 2 - window.innerWidth / 2);
+            this.kinet.animate("y", top - offsetY - window.innerHeight / 2);
             this.kinet.animate("height", h);
-            this.kinet.animate("width", w + offsetX/2);
+            this.kinet.animate("width", w + offsetX / 2);
 
             this.kinet.set("radius", radius);
             this.cursor_dot(true);
 
-            if (!this.magnet_effect && (this.options.magnetic || element.hasAttribute("data-blobify-magnetic"))) {
+            if (
+                !this.magnet_effect &&
+                (this.options.magnetic ||
+                    element.hasAttribute("data-blobify-magnetic"))
+            ) {
                 this.magnet_effect = true;
-                console.log("hello 2")
 
                 element.addEventListener("mousemove", (e) => {
                     const el_pos = element.getBoundingClientRect();
                     const el_x = e.pageX - el_pos.left - el_pos.width / 2;
                     const el_y = e.pageY - el_pos.top - el_pos.height / 2;
 
-                    this.kinet.animate("x", (el_pos.left - offsetX / 2) - window.innerWidth / 2);
-                    this.kinet.animate("y", (el_pos.top - offsetY) - window.innerHeight / 2);
+                    this.kinet.animate(
+                        "x",
+                        el_pos.left - offsetX / 2 - window.innerWidth / 2
+                    );
+                    this.kinet.animate(
+                        "y",
+                        el_pos.top - offsetY - window.innerHeight / 2
+                    );
 
-                    element.style.transform = `translate(${el_x * 0.5}px, ${el_y * 0.5}px)`;
-                })
+                    element.style.transform = `translate(${el_x * 0.5}px, ${
+                        el_y * 0.5
+                    }px)`;
+                });
 
                 element.addEventListener("mouseout", (e) => {
                     const el_pos = element.getBoundingClientRect();
                     element.style.transform = `translate(0px, 0px)`;
-                })
+                });
             }
         }
     }
 
     // Kinet events
     private kinet_tick(instances: any) {
-        this.cursor.style.height = `${instances.height.current}px`;
-        this.cursor.style.width = `${instances.width.current}px`;
+        const activateBlur =
+            Math.abs(instances.width.current - this.options.size) < 2 &&
+            Math.abs(instances.height.current - this.options.size) < 2 &&
+            Math.abs(this.options.size / 2 - this.options.size / 2) < 2;
+
+            this.cursor.style.height = `${instances.height.current}px`;
+            this.cursor.style.width = `${instances.width.current}px`;
         this.cursor.style.borderRadius = `${instances.radius.current}px`;
-        this.cursor.style.margin = this.focusedElement ? `0` : `-${this.options.size / 2}px 0 0 -${(this.options.size / 3)}px`;
+
+        if (!this.focusedElement) {
+            this.cursor.style.borderTopRightRadius = `${
+                activateBlur
+                    ? this.options.size / 2 -
+                      Math.min(
+                          Math.sqrt(
+                              Math.pow(Math.abs(instances.x.velocity), 2) +
+                                  Math.pow(Math.abs(instances.y.velocity), 2)
+                          ) * 2,
+                          60
+                      ) /
+                          2
+                    : this.options.size / 2
+            }px`;
+        }
+
+        this.cursor.style.margin = this.focusedElement
+            ? `0`
+            : `-${this.options.size / 2}px 0 0 -${this.options.size / 3}px`;
         this.cursor.style.transform = `translate3d(${instances.x.current}px, ${
             instances.y.current
-        }px, 0) rotateX(${instances.x.velocity / 2}deg) rotateY(${
-            instances.y.velocity / 2
+        }px, 0) rotate(${ !this.focusedElement ?
+            ((Math.atan2(
+                instances.y.velocity * window.devicePixelRatio,
+                instances.x.velocity * window.devicePixelRatio
+            ) *
+                180) /
+                Math.PI +
+            180 +
+            this.options.size) : 0
         }deg)`;
     }
 
@@ -200,7 +245,6 @@ export default class Blobify {
         this.cursor.style.mixBlendMode  = 'multiply';
         this.cursor.style.willChange    = 'transform';
         this.cursor.style.background    = this.options.bg;
-        this.cursor.style.margin        = this.focusedElement ? '0' : `-${this.options.size / 2}px 0 0 -${this.options.size / 2}px`;
         this.cursor.style.opacity       = this.options.opacity;
         this.cursor.style.width         = `${this.options.size}px`;
         this.cursor.style.height        = `${this.options.size}px`;
@@ -210,25 +254,23 @@ export default class Blobify {
     private cursor_dot(hidden: boolean = false) {
         this.globalStyles.innerHTML = "";
         this.globalStyles.appendChild(
-            document.createTextNode('* {cursor: inherit}')
+            document.createTextNode("* {cursor: inherit}")
         );
 
         if (!hidden) {
             this.globalStyles.appendChild(
                 document.createTextNode(
                     `html { cursor: url(data:image/svg+xml;base64,${btoa(
-                        this.dot(this.options.dotColour)
+                        this.dot()
                     )}) 4 4, auto;}`
                 )
             );
 
-            return
+            return;
         }
 
         this.globalStyles.appendChild(
-            document.createTextNode(
-                `html { cursor: none; }`
-            )
+            document.createTextNode(`html { cursor: none; }`)
         );
     }
 }
