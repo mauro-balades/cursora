@@ -67,7 +67,7 @@ export default class Blobify {
 
         this.kinet = new Kinet({
             ...this.options.type,
-            names: ["x", "y", "height", "width", "radius"],
+            names: ["x", "y", "height", "width", "radius", "opacity"],
         });
 
         // set default variables
@@ -76,6 +76,7 @@ export default class Blobify {
         this.kinet.set("radius", this.options.size / 2);
         this.kinet.set("x", 0);
         this.kinet.set("y", -window.innerHeight);
+        this.kinet.set("opacity", this.options.opacity);
 
         // set handler on kinet tick event
         this.kinet.on("tick", this.kinet_tick.bind(this));
@@ -83,9 +84,20 @@ export default class Blobify {
         // add event listeners
         document.addEventListener("mousemove", this.mousemove.bind(this));
         document.addEventListener("mouseover", this.mouseover.bind(this));
+
+        document.addEventListener('mouseenter', this.mouseenter.bind(this));
+        document.addEventListener('mouseleave', this.mouseleave.bind(this));
     }
 
     // Events
+
+    private mouseenter() {
+        this.kinet.animate("opacity", this.options.opacity)
+    }
+
+    private mouseleave() {
+        this.kinet.animate("opacity", 0)
+    }
 
     private mousemove(event: MouseEvent) {
         if (!this.focusedElement) {
@@ -230,6 +242,8 @@ export default class Blobify {
             180 +
             this.options.size) : 0
         }deg)`;
+
+        this.cursor.style.opacity = instances.opacity.current;
     }
 
     // styles
