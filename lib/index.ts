@@ -153,17 +153,17 @@ export default class Blobify {
                 : this.options.size / 2;
 
             // TODO: allow customization for offsets
-            let offsetX = 8;
-            let offsetY = 8;
+            let offsetX = 6;
+            let offsetY = 6;
             let h = height + offsetY * 2;
             let w = width + offsetX * 2;
 
             this.focusedElement = element;
 
-            this.kinet.animate("x", left - offsetX / 2 - window.innerWidth / 2);
-            this.kinet.animate("y", top - offsetY - window.innerHeight / 2);
-            this.kinet.animate("width", w + offsetX / 2);
-            this.kinet.animate("height", h);
+            this.kinet.animate("x", left - offsetX / 4 - window.innerWidth / 2);
+            this.kinet.animate("y", top - offsetY - (offsetY/2)  - window.innerHeight / 2);
+            this.kinet.animate("width", w + offsetX);
+            this.kinet.animate("height", h + offsetY);
 
             this.kinet.set("radius", radius);
             this.cursor_dot(true);
@@ -186,7 +186,7 @@ export default class Blobify {
                     );
                     this.kinet.animate(
                         "y",
-                        el_pos.top - offsetY - window.innerHeight / 2
+                        (el_pos.top - offsetY - window.innerHeight / 2)
                     );
 
                     element.style.transform = `translate(${el_x * 0.5}px, ${
@@ -209,10 +209,12 @@ export default class Blobify {
             Math.abs(instances.height.current - this.options.size) < 2 &&
             Math.abs(this.options.size / 2 - this.options.size / 2) < 2;
 
-            this.cursor.style.height = `${instances.height.current}px`;
-            this.cursor.style.width = `${instances.width.current}px`;
+
+        this.cursor.style.height = `${instances.height.current}px`;
+        this.cursor.style.width = `${instances.width.current}px`;
         this.cursor.style.borderRadius = `${instances.radius.current}px`;
 
+        // TODO: fix this
         // if (!this.focusedElement) {
         //     this.cursor.style.borderTopRightRadius = `${
         //         activateBlur
@@ -232,6 +234,8 @@ export default class Blobify {
         this.cursor.style.margin = this.focusedElement
             ? `0`
             : `-${this.options.size / 2}px 0 0 -${this.options.size / 3}px`;
+
+        // TODO: fix this
         // this.cursor.style.transform = `translate3d(${instances.x.current}px, ${
         //     instances.y.current
         // }px, 0) rotate(${ !this.focusedElement ?
@@ -244,6 +248,7 @@ export default class Blobify {
         //     180 +
         //     this.options.size) : 0
         // }deg)`;
+
         this.cursor.style.transform = `translate3d(${instances.x.current}px, ${
             instances.y.current
         }px, 0) rotateX(${instances.x.velocity / 2}deg) rotateY(${
