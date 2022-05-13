@@ -119,6 +119,7 @@ export default class Blobify {
                 event.clientY > (y + height) ||
                 event.clientX <( x - offset) ||
                 event.clientY < (y - offset)  ) {
+
                 this.circle_default();
 
                 this.kinet.animate("x", event.clientX - window.innerWidth / 2);
@@ -128,9 +129,9 @@ export default class Blobify {
                 this.kinet.animate("width", this.options.size);
 
                 this.kinet.set("radius", this.options.size / 2);
+                this.cursor_dot();
 
                 this.focusedElement = null;
-                this.cursor_dot();
             }
         }
     }
@@ -152,16 +153,17 @@ export default class Blobify {
                 : this.options.size / 2;
 
             // TODO: allow customization for offsets
-            let offsetX = 10;
-            let offsetY = 10;
+            let offsetX = 8;
+            let offsetY = 8;
             let h = height + offsetY * 2;
             let w = width + offsetX * 2;
 
             this.focusedElement = element;
+
             this.kinet.animate("x", left - offsetX / 2 - window.innerWidth / 2);
             this.kinet.animate("y", top - offsetY - window.innerHeight / 2);
-            this.kinet.animate("height", h);
             this.kinet.animate("width", w + offsetX / 2);
+            this.kinet.animate("height", h);
 
             this.kinet.set("radius", radius);
             this.cursor_dot(true);
@@ -193,8 +195,8 @@ export default class Blobify {
                 });
 
                 element.addEventListener("mouseout", (e) => {
-                    const el_pos = element.getBoundingClientRect();
                     element.style.transform = `translate(0px, 0px)`;
+                    this.cursor.style.transform = 'rotate(0)'
                 });
             }
         }
@@ -211,37 +213,41 @@ export default class Blobify {
             this.cursor.style.width = `${instances.width.current}px`;
         this.cursor.style.borderRadius = `${instances.radius.current}px`;
 
-        if (!this.focusedElement) {
-            this.cursor.style.borderTopRightRadius = `${
-                activateBlur
-                    ? this.options.size / 2 -
-                      Math.min(
-                          Math.sqrt(
-                              Math.pow(Math.abs(instances.x.velocity), 2) +
-                                  Math.pow(Math.abs(instances.y.velocity), 2)
-                          ) * 2,
-                          60
-                      ) /
-                          2
-                    : this.options.size / 2
-            }px`;
-        }
+        // if (!this.focusedElement) {
+        //     this.cursor.style.borderTopRightRadius = `${
+        //         activateBlur
+        //             ? this.options.size / 2 -
+        //               Math.min(
+        //                   Math.sqrt(
+        //                       Math.pow(Math.abs(instances.x.velocity), 2) +
+        //                           Math.pow(Math.abs(instances.y.velocity), 2)
+        //                   ) * 2,
+        //                   60
+        //               ) /
+        //                   2
+        //             : this.options.size / 2
+        //     }px`;
+        // }
 
         this.cursor.style.margin = this.focusedElement
             ? `0`
             : `-${this.options.size / 2}px 0 0 -${this.options.size / 3}px`;
+        // this.cursor.style.transform = `translate3d(${instances.x.current}px, ${
+        //     instances.y.current
+        // }px, 0) rotate(${ !this.focusedElement ?
+        //     ((Math.atan2(
+        //         instances.y.velocity * window.devicePixelRatio,
+        //         instances.x.velocity * window.devicePixelRatio
+        //     ) *
+        //         180) /
+        //         Math.PI +
+        //     180 +
+        //     this.options.size) : 0
+        // }deg)`;
         this.cursor.style.transform = `translate3d(${instances.x.current}px, ${
             instances.y.current
-        }px, 0) rotate(${ !this.focusedElement ?
-            ((Math.atan2(
-                instances.y.velocity * window.devicePixelRatio,
-                instances.x.velocity * window.devicePixelRatio
-            ) *
-                180) /
-                Math.PI +
-            180 +
-            this.options.size) : 0
-        }deg)`;
+        }px, 0) rotateX(${instances.x.velocity / 2}deg) rotateY(${
+            instances.y.velocity / 2}deg)`;
 
         this.cursor.style.opacity = instances.opacity.current;
     }
