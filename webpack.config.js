@@ -19,7 +19,7 @@ module.exports = {
         library: {
             type: "umd", // see https://webpack.js.org/configuration/output/#outputlibrarytype
             export: "default", // see https://github.com/webpack/webpack/issues/8480
-            name: "Blobify",
+            name: "Cursora",
         },
     },
     resolve: {

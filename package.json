@@ -1,5 +1,5 @@
 {
-    "name": "cursor-blobify",
+    "name": "cursor-cursora",
     "version": "1.0.0",
     "description": "",
     "main": "dist/index.js",
@@ -9,15 +9,15 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/mauro-balades/blobify.git"
+        "url": "git+https://github.com/mauro-balades/cursora.git"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/mauro-balades/blobify/issues"
+        "url": "https://github.com/mauro-balades/cursora/issues"
     },
-    "homepage": "https://github.com/mauro-balades/blobify#readme",
+    "homepage": "https://github.com/mauro-balades/cursora#readme",
     "devDependencies": {
         "ts-loader": "^9.2.8",
         "typescript": "^4.6.3",

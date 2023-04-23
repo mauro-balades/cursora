@@ -1,7 +1,32 @@
 // @ts-ignore
 import { default as Kinet } from "kinet";
 
-export default class Blobify {
+/**
+ * Cursora is a class that creates a cursor effect on HTML elements. It creates an animated
+ * blob that follows the cursor or focuses on the element that the cursor is hovering over.
+ * It also has an option to enable a magnetic effect.
+ *
+ * Example usage:
+ * ```typescript
+ * const options = {
+ *   size: 60,
+ *   bg: '#ffffff',
+ *   opacity: 0.5,
+ *   type: Cursora.types.normal,
+ *   dot: '#000000',
+ *   magnetic: true,
+ *   hoverOffset: {
+ *     x: 10,
+ *     y: 10,
+ *   },
+ * };
+ * const bursora = new Cursora(options);
+ * ```
+ */
+export default class Cursora {
+    /**
+     * A constant object that holds different types of cursor behavior presets.
+     */
     public static readonly types = {
         normal: {
             acceleration: 0.1,
@@ -16,12 +41,14 @@ export default class Blobify {
             friction: 0.35,
         },
     };
-
+    /**
+     * Default options for the cursor effect.
+     */
     public readonly defaultOptions = {
         size: 40,
         bg: "#dee2e6",
         opacity: 1,
-        type: Blobify.types.normal,
+        type: Cursora.types.normal,
         dot: "#000",
         magnetic: false,
         hoverOffset: {
@@ -29,20 +56,48 @@ export default class Blobify {
             y: 16,
         },
     };
-
+  /**
+   * A CSS selector that is used to find focusable elements on the page.
+   */
     private readonly focusableElements =
-        "[data-blobify], a:not([data-no-blobify]), button:not([data-no-blobify]), [data-blobify-tooltip]";
+        "[data-bursora], a:not([data-no-bursora]), button:not([data-no-bursora]), [data-bursora-tooltip]";
+          /**
+   * The HTML element that represents the cursor.
+   */
     private cursor: HTMLDivElement;
+      /**
+   * The Kinet instance that is used to animate the cursor.
+   */
     private kinet: Kinet;
 
-    private focusedElement: HTMLElement | null = null;
+  /**
+   * The currently focused element.
+   */
+  private focusedElement: HTMLElement | null = null;
+  /**
+   * The options for the cursor effect.
+   */
     private options: any;
 
+      /**
+   * A global style element that is used to apply styles to the page.
+   */
     private globalStyles: HTMLStyleElement;
+      /**
+   * A function that returns an SVG dot element.
+   */
     private readonly dot: any = () =>
         `<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill-rule="evenodd" fill="${this.options.dot}"/></svg>`;
 
+          /**
+   * A boolean that determines whether the magnetic effect is enabled or not.
+   */
     private magnet_effect: boolean = false;
+      /**
+   * The background color of the cursor.
+   */
+
+    private cursor_bg: string = "";
 
     constructor(options = {}) {
         // Merge default configuration
@@ -62,7 +117,7 @@ export default class Blobify {
 
         // Create global styles
         this.globalStyles = document.createElement("style");
-        this.globalStyles.setAttribute("data-blobify-global-styles", "");
+        this.globalStyles.setAttribute("data-bursora-global-styles", "");
         document.head.appendChild(this.globalStyles);
 
         // Style the cursor
@@ -75,6 +130,8 @@ export default class Blobify {
         });
 
         // set default variables
+        this.cursor_bg = this.options.bg;
+
         this.kinet.set("width", this.options.size);
         this.kinet.set("height", this.options.size);
         this.kinet.set("radius", this.options.size / 2);
@@ -133,7 +190,10 @@ export default class Blobify {
         if (!this.focusedElement) {
             this.kinet.animate("x", localX - (customSize ?? this.options.size) / 2);
             this.kinet.animate("y", localY - (customSize ?? this.options.size) / 2);
+
+            this.cursor_bg = this.options.bg;
         } else {
+
             this.magnet_effect = false;
 
             let element = this.focusedElement as HTMLElement;
@@ -172,9 +232,14 @@ export default class Blobify {
         ) as HTMLElement | null;
 
         if (element) {
+
+            if (element.hasAttribute("data-bursora-background")) {
+                this.cursor_bg = element.getAttribute("data-bursora-background") as string;
+            }
+
             const { left } = element.getBoundingClientRect();
 
-            let radius_attr = element.getAttribute("data-blobify-radius");
+            let radius_attr = element.getAttribute("data-bursora-radius");
             let radius = radius_attr
                 ? parseInt(radius_attr)
                 : this.options.size / 2;
@@ -201,7 +266,7 @@ export default class Blobify {
             if (
                 !this.magnet_effect &&
                 (this.options.magnetic ||
-                    element.hasAttribute("data-blobify-magnetic"))
+                    element.hasAttribute("data-bursora-magnetic"))
             ) {
                 this.magnet_effect = true;
 
@@ -236,6 +301,8 @@ export default class Blobify {
 
     // Kinet events
     private kinet_tick(instances: any) {
+        this.cursor.style.background = this.cursor_bg;
+
         this.cursor.style.height = `${instances.height.current}px`;
         this.cursor.style.width = `${instances.width.current}px`;
         this.cursor.style.borderRadius = `${instances.radius.current}px`;
@@ -246,7 +313,9 @@ export default class Blobify {
         this.cursor.style.opacity = instances.opacity.current;
     }
 
-    // styles
+    /**
+     * Sets the default cursor style
+     */
     // prettier-ignore
     private circle_default() {
         this.cursor.style.zIndex        = '-1';
@@ -262,29 +331,23 @@ export default class Blobify {
         this.cursor.style.opacity       = this.options.opacity;
         this.cursor.style.width         = `${this.options.size}px`;
         this.cursor.style.height        = `${this.options.size}px`;
+        this.cursor.style.transition    = `background-color .1s`;
         this.cursor.style.borderRadius  = `${this.options.size / 2}`;
     }
 
     private cursor_dot(hidden: boolean = false) {
-        this.globalStyles.innerHTML = "";
-        this.globalStyles.appendChild(
-            document.createTextNode("* {cursor: inherit}")
-        );
+        this.globalStyles.innerHTML = '';
+
+        const inheritCursorStyle = document.createTextNode('* { cursor: inherit }');
+        this.globalStyles.appendChild(inheritCursorStyle);
 
         if (!hidden) {
-            this.globalStyles.appendChild(
-                document.createTextNode(
-                    `html { cursor: url(data:image/svg+xml;base64,${btoa(
-                        this.dot()
-                    )}) 4 4, auto;}`
-                )
-            );
-
-            return;
+          const dotSvgBase64 = btoa(this.dot());
+          const dotCursorStyle = document.createTextNode(`html { cursor: url(data:image/svg+xml;base64,${dotSvgBase64}) 4 4, auto; }`);
+          this.globalStyles.appendChild(dotCursorStyle);
+        } else {
+          const noneCursorStyle = document.createTextNode(`html { cursor: none; }`);
+          this.globalStyles.appendChild(noneCursorStyle);
         }
-
-        this.globalStyles.appendChild(
-            document.createTextNode(`html { cursor: none; }`)
-        );
     }
 }

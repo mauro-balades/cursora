@@ -14,26 +14,25 @@
         <div
             onclick="alert('clicked!')"
             data-cursora-radius="10"
-            data-cursora-magnetic
             data-cursora
+            data-cursora-background="red"
             style="
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border-radius: 10px;
-                width: 400px;
-                height: 100px;
+                width: 200px;
+                height: 50px;
                 background: #000;
                 color: #fff;
                 transition: transform 0.15s linear;
-                font-size: 40px;
             "
         >
-            hover me!
+            Change da color
         </div>
         <script src="../dist/index.js"></script>
         <script>
-            new Cursora();
+            new Cursora({ type: Cursora.types.normal });
         </script>
     </body>
 </html>
