@@ -24,6 +24,10 @@ export default class Blobify {
         type: Blobify.types.normal,
         dot: "#000",
         magnetic: false,
+        hoverOffset: {
+            x: 16,
+            y: 16
+        }
     };
 
     private readonly focusableElements =
@@ -100,9 +104,12 @@ export default class Blobify {
     }
 
     private mousemove(event: MouseEvent) {
+        const localX = event.clientX;
+        const localY = event.clientY;
+
         if (!this.focusedElement) {
-            this.kinet.animate("x", event.clientX - window.innerWidth / 2);
-            this.kinet.animate("y", event.clientY - window.innerHeight / 2);
+            this.kinet.animate("x", localX - ( this.options.size / 2 ));
+            this.kinet.animate("y", localY - ( this.options.size / 2 ));
         } else {
             this.magnet_effect = false;
 
@@ -122,8 +129,8 @@ export default class Blobify {
 
                 this.circle_default();
 
-                this.kinet.animate("x", event.clientX - window.innerWidth / 2);
-                this.kinet.animate("y", event.clientY - window.innerHeight / 2);
+                this.kinet.animate("x", localX - ( this.options.size / 2 ));
+                this.kinet.animate("y", localY - ( this.options.size / 2 ));
 
                 this.kinet.animate("height", this.options.size);
                 this.kinet.animate("width", this.options.size);
@@ -138,12 +145,10 @@ export default class Blobify {
 
     private mouseover(event: MouseEvent) {
         const element = (event.target as HTMLElement).closest(
-            // @ts-ignore
             this.focusableElements
-        ) as HTMLElement;
+        ) as HTMLElement | null;
 
         if (element) {
-            // @ts-ignore
             const { width, height, left, top } =
                 element.getBoundingClientRect();
 
@@ -153,17 +158,14 @@ export default class Blobify {
                 : this.options.size / 2;
 
             // TODO: allow customization for offsets
-            let offsetX = 6;
-            let offsetY = 6;
-            let h = height + offsetY * 2;
-            let w = width + offsetX * 2;
+            let h = 16, w = 16;
 
             this.focusedElement = element;
 
-            this.kinet.animate("x", left - offsetX / 4 - window.innerWidth / 2);
-            this.kinet.animate("y", top - offsetY - (offsetY/2)  - window.innerHeight / 2);
-            this.kinet.animate("width", w + offsetX);
-            this.kinet.animate("height", h + offsetY);
+            this.kinet.animate("x", left - (w/2) );
+            this.kinet.animate("y", element.offsetTop - (h/2) );
+            this.kinet.animate("width", element.offsetWidth + this.options.hoverOffset.x);
+            this.kinet.animate("height", element.offsetHeight + this.options.hoverOffset.y);
 
             this.kinet.set("radius", radius);
             this.cursor_dot(true);
@@ -182,21 +184,21 @@ export default class Blobify {
 
                     this.kinet.animate(
                         "x",
-                        el_pos.left - offsetX / 2 - window.innerWidth / 2
+                        (el_pos.left - (this.options.hoverOffset.x / 2))
                     );
                     this.kinet.animate(
                         "y",
-                        (el_pos.top - offsetY - window.innerHeight / 2)
+                        (el_pos.top - (el_pos.height / 2) + (this.options.hoverOffset.y * 3))
                     );
 
-                    element.style.transform = `translate(${el_x * 0.5}px, ${
-                        el_y * 0.5
+                    element.style.transform = `translate(${el_x - (this.options.hoverOffset.x / 2)}px, ${
+                        el_y - (this.options.hoverOffset.y / 2)
                     }px)`;
                 });
 
                 element.addEventListener("mouseout", (e) => {
                     element.style.transform = `translate(0px, 0px)`;
-                    this.cursor.style.transform = 'rotate(0)'
+                    this.cursor.style.transform = 'rotate(0)';
                 });
             }
         }
@@ -231,10 +233,6 @@ export default class Blobify {
         //     }px`;
         // }
 
-        this.cursor.style.margin = this.focusedElement
-            ? `0`
-            : `-${this.options.size / 2}px 0 0 -${this.options.size / 3}px`;
-
         // TODO: fix this
         // this.cursor.style.transform = `translate3d(${instances.x.current}px, ${
         //     instances.y.current
@@ -249,10 +247,12 @@ export default class Blobify {
         //     this.options.size) : 0
         // }deg)`;
 
-        this.cursor.style.transform = `translate3d(${instances.x.current}px, ${
-            instances.y.current
-        }px, 0) rotateX(${instances.x.velocity / 2}deg) rotateY(${
-            instances.y.velocity / 2}deg)`;
+        // this.cursor.style.transform = `translate3d(${instances.x.current}px, ${
+        //     instances.y.current
+        // }px, 0) rotateX(${instances.x.velocity / 2}deg) rotateY(${
+        //     instances.y.velocity / 2}deg)`;
+        this.cursor.style.top = `${instances.y.current}px`;
+        this.cursor.style.left = `${instances.x.current}px`;
 
         this.cursor.style.opacity = instances.opacity.current;
     }
@@ -265,7 +265,7 @@ export default class Blobify {
         this.cursor.style.left          = '50%';
         this.cursor.style.cursor        = 'none';
         this.cursor.style.pointerEvents = 'none';
-        this.cursor.style.position      = 'fixed';
+        this.cursor.style.position      = 'absolute';
         this.cursor.style.overflow      = 'visible';
         this.cursor.style.mixBlendMode  = 'multiply';
         this.cursor.style.willChange    = 'transform';
