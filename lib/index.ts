@@ -20,7 +20,7 @@ import { default as Kinet } from "kinet";
  *     y: 10,
  *   },
  * };
- * const bursora = new Cursora(options);
+ * const cursora = new Cursora(options);
  * ```
  */
 export default class Cursora {
@@ -55,12 +55,14 @@ export default class Cursora {
             x: 16,
             y: 16,
         },
+        zIndex: -1,
+        invert: false,
     };
   /**
    * A CSS selector that is used to find focusable elements on the page.
    */
     private readonly focusableElements =
-        "[data-bursora], a:not([data-no-bursora]), button:not([data-no-bursora]), [data-bursora-tooltip]";
+        "[data-cursora], a:not([data-no-cursora]), button:not([data-no-cursora]), [data-cursora-tooltip]";
           /**
    * The HTML element that represents the cursor.
    */
@@ -96,12 +98,12 @@ export default class Cursora {
       /**
    * The background color of the cursor.
    */
-
     private cursor_bg: string = "";
 
     constructor(options = {}) {
         // Merge default configuration
         this.options = Object.assign({}, this.defaultOptions, options);
+        console.log(this.options)
 
         // Create a new HTML element and append it to the document's body
         this.cursor = document.createElement("div");
@@ -117,8 +119,10 @@ export default class Cursora {
 
         // Create global styles
         this.globalStyles = document.createElement("style");
-        this.globalStyles.setAttribute("data-bursora-global-styles", "");
+        this.globalStyles.setAttribute("data-cursora-global-styles", "");
         document.head.appendChild(this.globalStyles);
+
+        this.cursor_bg = this.options.bg;
 
         // Style the cursor
         this.cursor_dot();
@@ -130,7 +134,6 @@ export default class Cursora {
         });
 
         // set default variables
-        this.cursor_bg = this.options.bg;
 
         this.kinet.set("width", this.options.size);
         this.kinet.set("height", this.options.size);
@@ -233,24 +236,24 @@ export default class Cursora {
 
         if (element) {
 
-            if (element.hasAttribute("data-bursora-background")) {
-                this.cursor_bg = element.getAttribute("data-bursora-background") as string;
+            if (element.hasAttribute("data-cursora-background")) {
+                this.cursor_bg = element.getAttribute("data-cursora-background") as string;
             }
 
-            const { left } = element.getBoundingClientRect();
+            const { left, top } = element.getBoundingClientRect();
 
-            let radius_attr = element.getAttribute("data-bursora-radius");
+            let radius_attr = element.getAttribute("data-cursora-radius");
             let radius = radius_attr
                 ? parseInt(radius_attr)
                 : this.options.size / 2;
 
-            let h = 16,
-                w = 16;
+            let h = this.options.hoverOffset.y,
+                w = this.options.hoverOffset.x;
 
             this.focusedElement = element;
 
             this.kinet.animate("x", left - w / 2);
-            this.kinet.animate("y", element.offsetTop - h / 2);
+            this.kinet.animate("y", top - h / 2);
             this.kinet.animate(
                 "width",
                 element.offsetWidth + this.options.hoverOffset.x
@@ -266,7 +269,7 @@ export default class Cursora {
             if (
                 !this.magnet_effect &&
                 (this.options.magnetic ||
-                    element.hasAttribute("data-bursora-magnetic"))
+                    element.hasAttribute("data-cursora-magnetic"))
             ) {
                 this.magnet_effect = true;
 
@@ -318,27 +321,29 @@ export default class Cursora {
      */
     // prettier-ignore
     private circle_default() {
-        this.cursor.style.zIndex        = '-1';
-        this.cursor.style.top           = '-100px';
-        this.cursor.style.left          = '50%';
-        this.cursor.style.cursor        = 'none';
-        this.cursor.style.pointerEvents = 'none';
-        this.cursor.style.position      = 'absolute';
-        this.cursor.style.overflow      = 'visible';
-        this.cursor.style.mixBlendMode  = 'multiply';
-        this.cursor.style.willChange    = 'transform';
-        this.cursor.style.background    = this.options.bg;
-        this.cursor.style.opacity       = this.options.opacity;
-        this.cursor.style.width         = `${this.options.size}px`;
-        this.cursor.style.height        = `${this.options.size}px`;
-        this.cursor.style.transition    = `background-color .1s`;
-        this.cursor.style.borderRadius  = `${this.options.size / 2}`;
+        this.cursor.style.zIndex            = this.options.zIndex;
+        this.cursor.style.top               = '-100px';
+        this.cursor.style.left              = '50%';
+        this.cursor.style.cursor            = 'none';
+        this.cursor.style.pointerEvents     = 'none';
+        this.cursor.style.position          = 'absolute';
+        this.cursor.style.overflow          = 'visible';
+        this.cursor.style.willChange        = 'transform';
+        this.cursor.style.background        = this.options.bg;
+        this.cursor.style.opacity           = this.options.opacity;
+        this.cursor.style.width             = `${this.options.size}px`;
+        this.cursor.style.height            = `${this.options.size}px`;
+        this.cursor.style.transition        = `background-color .1s`;
+        this.cursor.style.borderRadius      = `${this.options.size / 2}`;
+
+        if (this.options.invert)
+            this.cursor.style.mixBlendMode  = 'difference';
     }
 
     private cursor_dot(hidden: boolean = false) {
         this.globalStyles.innerHTML = '';
 
-        const inheritCursorStyle = document.createTextNode('* { cursor: inherit }');
+        const inheritCursorStyle = document.createTextNode('* { cursor: inherit; }');
         this.globalStyles.appendChild(inheritCursorStyle);
 
         if (!hidden) {
