@@ -26,8 +26,8 @@ export default class Blobify {
         magnetic: false,
         hoverOffset: {
             x: 16,
-            y: 16
-        }
+            y: 16,
+        },
     };
 
     private readonly focusableElements =
@@ -89,27 +89,50 @@ export default class Blobify {
         document.addEventListener("mousemove", this.mousemove.bind(this));
         document.addEventListener("mouseover", this.mouseover.bind(this));
 
-        document.addEventListener('mouseenter', this.mouseenter.bind(this));
-        document.addEventListener('mouseleave', this.mouseleave.bind(this));
+        document.addEventListener("mouseenter", this.mouseenter.bind(this));
+        document.addEventListener("mouseleave", this.mouseleave.bind(this));
+
+        document.addEventListener("mouseleave", this.mouseleave.bind(this));
+        document.addEventListener("mouseup", this.mouseup.bind(this));
+        document.addEventListener("mousedown", this.mousedown.bind(this));
     }
 
     // Events
 
+    private mouseup(e: MouseEvent) {
+        if (!this.focusedElement) {
+            this.kinet.animate("height", this.options.size);
+            this.kinet.animate("width", this.options.size);
+
+            this.mousemove(e); // Update the location
+        }
+    }
+
+    private mousedown(e: MouseEvent) {
+        if (!this.focusedElement) {
+            let s = this.options.size - (this.options.size / 4);
+            this.kinet.animate("height", s);
+            this.kinet.animate("width", s);
+
+            this.mousemove(e, s); // Update the location
+        }
+    }
+
     private mouseenter() {
-        this.kinet.animate("opacity", this.options.opacity)
+        this.kinet.animate("opacity", this.options.opacity);
     }
 
     private mouseleave() {
-        this.kinet.animate("opacity", 0)
+        this.kinet.animate("opacity", 0);
     }
 
-    private mousemove(event: MouseEvent) {
+    private mousemove(event: MouseEvent, customSize: number | undefined = undefined) {
         const localX = event.clientX;
         const localY = event.clientY;
 
         if (!this.focusedElement) {
-            this.kinet.animate("x", localX - ( this.options.size / 2 ));
-            this.kinet.animate("y", localY - ( this.options.size / 2 ));
+            this.kinet.animate("x", localX - (customSize ?? this.options.size) / 2);
+            this.kinet.animate("y", localY - (customSize ?? this.options.size) / 2);
         } else {
             this.magnet_effect = false;
 
@@ -149,23 +172,28 @@ export default class Blobify {
         ) as HTMLElement | null;
 
         if (element) {
-            const { width, height, left, top } =
-                element.getBoundingClientRect();
+            const { left } = element.getBoundingClientRect();
 
             let radius_attr = element.getAttribute("data-blobify-radius");
             let radius = radius_attr
                 ? parseInt(radius_attr)
                 : this.options.size / 2;
 
-            // TODO: allow customization for offsets
-            let h = 16, w = 16;
+            let h = 16,
+                w = 16;
 
             this.focusedElement = element;
 
-            this.kinet.animate("x", left - (w/2) );
-            this.kinet.animate("y", element.offsetTop - (h/2) );
-            this.kinet.animate("width", element.offsetWidth + this.options.hoverOffset.x);
-            this.kinet.animate("height", element.offsetHeight + this.options.hoverOffset.y);
+            this.kinet.animate("x", left - w / 2);
+            this.kinet.animate("y", element.offsetTop - h / 2);
+            this.kinet.animate(
+                "width",
+                element.offsetWidth + this.options.hoverOffset.x
+            );
+            this.kinet.animate(
+                "height",
+                element.offsetHeight + this.options.hoverOffset.y
+            );
 
             this.kinet.set("radius", radius);
             this.cursor_dot(true);
@@ -184,21 +212,23 @@ export default class Blobify {
 
                     this.kinet.animate(
                         "x",
-                        (el_pos.left - (this.options.hoverOffset.x / 2))
+                        el_pos.left - this.options.hoverOffset.x / 2
                     );
                     this.kinet.animate(
                         "y",
-                        (el_pos.top - (el_pos.height / 2) + (this.options.hoverOffset.y * 3))
+                        el_pos.top -
+                            el_pos.height / 2 +
+                            this.options.hoverOffset.y * 3
                     );
 
-                    element.style.transform = `translate(${el_x - (this.options.hoverOffset.x / 2)}px, ${
-                        el_y - (this.options.hoverOffset.y / 2)
-                    }px)`;
+                    element.style.transform = `translate(${
+                        el_x - this.options.hoverOffset.x / 2
+                    }px, ${el_y - this.options.hoverOffset.y / 2}px)`;
                 });
 
                 element.addEventListener("mouseout", (e) => {
                     element.style.transform = `translate(0px, 0px)`;
-                    this.cursor.style.transform = 'rotate(0)';
+                    this.cursor.style.transform = "rotate(0)";
                 });
             }
         }
@@ -206,51 +236,10 @@ export default class Blobify {
 
     // Kinet events
     private kinet_tick(instances: any) {
-        const activateBlur =
-            Math.abs(instances.width.current - this.options.size) < 2 &&
-            Math.abs(instances.height.current - this.options.size) < 2 &&
-            Math.abs(this.options.size / 2 - this.options.size / 2) < 2;
-
-
         this.cursor.style.height = `${instances.height.current}px`;
         this.cursor.style.width = `${instances.width.current}px`;
         this.cursor.style.borderRadius = `${instances.radius.current}px`;
 
-        // TODO: fix this
-        // if (!this.focusedElement) {
-        //     this.cursor.style.borderTopRightRadius = `${
-        //         activateBlur
-        //             ? this.options.size / 2 -
-        //               Math.min(
-        //                   Math.sqrt(
-        //                       Math.pow(Math.abs(instances.x.velocity), 2) +
-        //                           Math.pow(Math.abs(instances.y.velocity), 2)
-        //                   ) * 2,
-        //                   60
-        //               ) /
-        //                   2
-        //             : this.options.size / 2
-        //     }px`;
-        // }
-
-        // TODO: fix this
-        // this.cursor.style.transform = `translate3d(${instances.x.current}px, ${
-        //     instances.y.current
-        // }px, 0) rotate(${ !this.focusedElement ?
-        //     ((Math.atan2(
-        //         instances.y.velocity * window.devicePixelRatio,
-        //         instances.x.velocity * window.devicePixelRatio
-        //     ) *
-        //         180) /
-        //         Math.PI +
-        //     180 +
-        //     this.options.size) : 0
-        // }deg)`;
-
-        // this.cursor.style.transform = `translate3d(${instances.x.current}px, ${
-        //     instances.y.current
-        // }px, 0) rotateX(${instances.x.velocity / 2}deg) rotateY(${
-        //     instances.y.velocity / 2}deg)`;
         this.cursor.style.top = `${instances.y.current}px`;
         this.cursor.style.left = `${instances.x.current}px`;
 
@@ -261,7 +250,7 @@ export default class Blobify {
     // prettier-ignore
     private circle_default() {
         this.cursor.style.zIndex        = '-1';
-        this.cursor.style.top           = '50%';
+        this.cursor.style.top           = '-100px';
         this.cursor.style.left          = '50%';
         this.cursor.style.cursor        = 'none';
         this.cursor.style.pointerEvents = 'none';
