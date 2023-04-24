@@ -2,13 +2,9 @@
 layout: docs
 ---
 
-{{ if eq hugo.Environment "production" -}}
-  {{- $sassOptions = merge $sassOptions (dict "outputStyle" "compressed") -}}
-{{- end -}}
-
 {{- $style := resources.Get "scss/docs.scss" | toCSS $sassOptions | postCSS $postcssOptions }}
 
-{{ define "body_override" }}<body{{ if (eq .Page.Params.toc true) }} data-bs-spy="scroll" data-bs-target="#TableOfContents"{{ end }}>{{ end }}
+{{ define "body_override" }}<body data-bs-spy="scroll" data-bs-target="#TableOfContents">{{ end }}
 {{ define "main" }}
   <div class="container-xxl bd-gutter mt-3 my-md-4 bd-layout">
     <aside class="bd-sidebar">
@@ -19,7 +15,6 @@ layout: docs
         </div>
 
         <div class="offcanvas-body">
-          {{ partial "docs-sidebar" . }}
         </div>
       </div>
     </aside>
@@ -35,12 +30,12 @@ layout: docs
               View on GitHub
             </a>
           </div>
-          <h1 class="bd-title mb-0" id="content">{{ .Title | markdownify }}</h1>
+          <h1 class="bd-title mb-0" id="content">{{ Title | markdownify }}</h1>
         </div>
-        <p class="bd-lead">{{ .Page.Params.Description | markdownify }}</p>
+        <p class="bd-lead">{{ Page.Params.Description | markdownify }}</p>
       </div>
 
-      {{ if (eq .Page.Params.toc true) }}
+      {{ if (eq Page.Params.toc true) }}
         <div class="bd-toc mt-3 mb-5 my-lg-0 mb-lg-5 px-sm-1 text-body-secondary">
           <button class="btn btn-link p-md-0 mb-2 mb-md-0 text-decoration-none bd-toc-toggle d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#tocContents" aria-expanded="false" aria-controls="tocContents">
             On this page
@@ -49,33 +44,27 @@ layout: docs
           <strong class="d-none d-md-block h6 my-2 ms-3">On this page</strong>
           <hr class="d-none d-md-block my-2 ms-3">
           <div class="collapse bd-toc-collapse" id="tocContents">
-            {{ .TableOfContents }}
+            {{ TableOfContents }}
           </div>
         </div>
       {{ end }}
 
       <div class="bd-content ps-lg-2">
-        {{ if .Page.Params.sections }}
+        {{ if Page.Params.sections }}
           <div class="row g-3">
-            {{ range .Page.Params.sections }}
+            {{ range Page.Params.sections }}
             <div class="col-md-6">
               <a class="d-block text-decoration-none" href="../{{ urlize .title }}/">
-                <strong class="d-block h5 mb-0">{{ .title }}</strong>
-                <span class="text-secondary">{{ .description }}</span>
+                <strong class="d-block h5 mb-0">{{ title }}</strong>
+                <span class="text-secondary">{{ description }}</span>
               </a>
             </div>
             {{ end }}
           </div>
         {{ end }}
 
-        {{ .Content }}
+        {{ Content }}
       </div>
     </main>
   </div>
-{{ end }}
-{{ define "footer" }}
-  {{ range .Page.Params.extra_js -}}
-    <script{{ with .async }} async{{ end }} src="{{ .src }}"></script>
-  {{- end -}}
-  <div class="position-fixed" aria-hidden="true"><input type="text" tabindex="-1"></div>
 {{ end }}
