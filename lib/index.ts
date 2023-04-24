@@ -60,7 +60,8 @@ export default class Cursora {
         border: {
             size: 0,
             color: 'black'
-        }
+        },
+        magnetStrength: 0.3
     };
     /**
      * A CSS selector that is used to find focusable elements on the page.
@@ -219,11 +220,10 @@ export default class Cursora {
             // TODO: allow customization for offsets
             let offset = 15;
 
-            // prettier-ignore
-            if (event.clientX > (x + width)  ||
+            if ((event.clientX > (x + width) ||
                 event.clientY > (y + height) ||
-                event.clientX <( x - offset) ||
-                event.clientY < (y - offset)  ) {
+                event.clientX < (x - offset) ||
+                event.clientY < (y - offset))) {
 
                 this.circle_default();
 
@@ -265,8 +265,6 @@ export default class Cursora {
 
             this.focusedElement = element;
 
-            this.kinet.animate("x", left - w / 2);
-            this.kinet.animate("y", top - h / 2);
             this.kinet.animate(
                 "width",
                 element.offsetWidth + this.options.hoverOffset.x
@@ -282,41 +280,47 @@ export default class Cursora {
             if (
                 !this.magnet_effect &&
                 (this.options.magnetic ||
-                    element.hasAttribute("data-cursora-magnetic"))
+                    element.hasAttribute("data-cursora-magnetic")) 
             ) {
                 this.magnet_effect = true;
+                const el_pos = element.getBoundingClientRect();
+                let magnetStrength = element.hasAttribute("data-cursora-magnet-strength") ?
+                    parseFloat(element.getAttribute("data-cursora-magnet-strength") as string) :
+                    this.options.magnetStrength
 
                 element.addEventListener("mousemove", (e) => {
-                    const el_pos = element.getBoundingClientRect();
                     const el_x = e.pageX - el_pos.left - el_pos.width / 2;
                     const el_y = e.pageY - el_pos.top - el_pos.height / 2;
 
                     this.kinet.animate(
                         "x",
-                        el_pos.left - this.options.hoverOffset.x / 2
+                        (((el_x - this.options.hoverOffset.x) * magnetStrength) - (this.options.hoverOffset.x / 2) + left)
                     );
                     this.kinet.animate(
                         "y",
-                        el_pos.top -
-                            el_pos.height / 2 +
-                            this.options.hoverOffset.y * 3
+                        (((el_y - this.options.hoverOffset.y) * magnetStrength) - (this.options.hoverOffset.x / 2) + top)
                     );
 
                     element.style.transform = `translate(${
-                        el_x - this.options.hoverOffset.x / 2
-                    }px, ${el_y - this.options.hoverOffset.y / 2}px)`;
+                        (el_x - this.options.hoverOffset.x / 2) * magnetStrength
+                    }px, ${(el_y - this.options.hoverOffset.y / 2) * magnetStrength}px)`;
                 });
 
                 element.addEventListener("mouseout", (e) => {
                     element.style.transform = `translate(0px, 0px)`;
                     this.cursor.style.transform = "rotate(0)";
+                    // this.magnet_effect
                 });
+            } else {
+                this.kinet.animate("x", left - w / 2);
+                this.kinet.animate("y", top - h / 2);
             }
         }
     }
 
     // Kinet events
     private kinet_tick(instances: any) {
+
         this.cursor.style.background = this.cursor_bg;
 
         this.cursor.style.height = `${instances.height.current}px`;
