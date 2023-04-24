@@ -59,9 +59,9 @@ export default class Cursora {
         invert: false,
         border: {
             size: 0,
-            color: 'black'
+            color: "black",
         },
-        magnetStrength: 0.3
+        magnetStrength: 0.3,
     };
     /**
      * A CSS selector that is used to find focusable elements on the page.
@@ -220,15 +220,16 @@ export default class Cursora {
             // TODO: allow customization for offsets
             let offset = 15;
 
-            if ((event.clientX > (x + width) ||
-                event.clientY > (y + height) ||
-                event.clientX < (x - offset) ||
-                event.clientY < (y - offset))) {
-
+            if (
+                event.clientX > x + width ||
+                event.clientY > y + height ||
+                event.clientX < x - offset ||
+                event.clientY < y - offset
+            ) {
                 this.circle_default();
 
-                this.kinet.animate("x", localX - ( this.options.size / 2 ));
-                this.kinet.animate("y", localY - ( this.options.size / 2 ));
+                this.kinet.animate("x", localX - this.options.size / 2);
+                this.kinet.animate("y", localY - this.options.size / 2);
 
                 this.kinet.animate("height", this.options.size);
                 this.kinet.animate("width", this.options.size);
@@ -280,13 +281,19 @@ export default class Cursora {
             if (
                 !this.magnet_effect &&
                 (this.options.magnetic ||
-                    element.hasAttribute("data-cursora-magnetic")) 
+                    element.hasAttribute("data-cursora-magnetic"))
             ) {
                 this.magnet_effect = true;
                 const el_pos = element.getBoundingClientRect();
-                let magnetStrength = element.hasAttribute("data-cursora-magnet-strength") ?
-                    parseFloat(element.getAttribute("data-cursora-magnet-strength") as string) :
-                    this.options.magnetStrength
+                let magnetStrength = element.hasAttribute(
+                    "data-cursora-magnet-strength"
+                )
+                    ? parseFloat(
+                          element.getAttribute(
+                              "data-cursora-magnet-strength"
+                          ) as string
+                      )
+                    : this.options.magnetStrength;
 
                 element.addEventListener("mousemove", (e) => {
                     const el_x = e.pageX - el_pos.left - el_pos.width / 2;
@@ -294,16 +301,22 @@ export default class Cursora {
 
                     this.kinet.animate(
                         "x",
-                        (((el_x - this.options.hoverOffset.x) * magnetStrength) - (this.options.hoverOffset.x / 2) + left)
+                        (el_x - this.options.hoverOffset.x) * magnetStrength -
+                            this.options.hoverOffset.x / 2 +
+                            left
                     );
                     this.kinet.animate(
                         "y",
-                        (((el_y - this.options.hoverOffset.y) * magnetStrength) - (this.options.hoverOffset.x / 2) + top)
+                        (el_y - this.options.hoverOffset.y) * magnetStrength -
+                            this.options.hoverOffset.x / 2 +
+                            top
                     );
 
                     element.style.transform = `translate(${
                         (el_x - this.options.hoverOffset.x / 2) * magnetStrength
-                    }px, ${(el_y - this.options.hoverOffset.y / 2) * magnetStrength}px)`;
+                    }px, ${
+                        (el_y - this.options.hoverOffset.y / 2) * magnetStrength
+                    }px)`;
                 });
 
                 element.addEventListener("mouseout", (e) => {
@@ -320,7 +333,6 @@ export default class Cursora {
 
     // Kinet events
     private kinet_tick(instances: any) {
-
         this.cursor.style.background = this.cursor_bg;
 
         this.cursor.style.height = `${instances.height.current}px`;
