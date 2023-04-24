@@ -57,53 +57,57 @@ export default class Cursora {
         },
         zIndex: -1,
         invert: false,
+        border: {
+            size: 0,
+            color: 'black'
+        }
     };
-  /**
-   * A CSS selector that is used to find focusable elements on the page.
-   */
+    /**
+     * A CSS selector that is used to find focusable elements on the page.
+     */
     private readonly focusableElements =
         "[data-cursora], a:not([data-no-cursora]), button:not([data-no-cursora]), [data-cursora-tooltip]";
-          /**
-   * The HTML element that represents the cursor.
-   */
+    /**
+     * The HTML element that represents the cursor.
+     */
     private cursor: HTMLDivElement;
-      /**
-   * The Kinet instance that is used to animate the cursor.
-   */
+    /**
+     * The Kinet instance that is used to animate the cursor.
+     */
     private kinet: Kinet;
 
-  /**
-   * The currently focused element.
-   */
-  private focusedElement: HTMLElement | null = null;
-  /**
-   * The options for the cursor effect.
-   */
+    /**
+     * The currently focused element.
+     */
+    private focusedElement: HTMLElement | null = null;
+    /**
+     * The options for the cursor effect.
+     */
     private options: any;
 
-      /**
-   * A global style element that is used to apply styles to the page.
-   */
+    /**
+     * A global style element that is used to apply styles to the page.
+     */
     private globalStyles: HTMLStyleElement;
-      /**
-   * A function that returns an SVG dot element.
-   */
+    /**
+     * A function that returns an SVG dot element.
+     */
     private readonly dot: any = () =>
         `<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill-rule="evenodd" fill="${this.options.dot}"/></svg>`;
 
-          /**
-   * A boolean that determines whether the magnetic effect is enabled or not.
-   */
+    /**
+     * A boolean that determines whether the magnetic effect is enabled or not.
+     */
     private magnet_effect: boolean = false;
-      /**
-   * The background color of the cursor.
-   */
+    /**
+     * The background color of the cursor.
+     */
     private cursor_bg: string = "";
 
     constructor(options = {}) {
         // Merge default configuration
         this.options = Object.assign({}, this.defaultOptions, options);
-        console.log(this.options)
+        console.log(this.options);
 
         // Create a new HTML element and append it to the document's body
         this.cursor = document.createElement("div");
@@ -170,7 +174,7 @@ export default class Cursora {
 
     private mousedown(e: MouseEvent) {
         if (!this.focusedElement) {
-            let s = this.options.size - (this.options.size / 4);
+            let s = this.options.size - this.options.size / 4;
             this.kinet.animate("height", s);
             this.kinet.animate("width", s);
 
@@ -186,17 +190,25 @@ export default class Cursora {
         this.kinet.animate("opacity", 0);
     }
 
-    private mousemove(event: MouseEvent, customSize: number | undefined = undefined) {
+    private mousemove(
+        event: MouseEvent,
+        customSize: number | undefined = undefined
+    ) {
         const localX = event.clientX;
         const localY = event.clientY;
 
         if (!this.focusedElement) {
-            this.kinet.animate("x", localX - (customSize ?? this.options.size) / 2);
-            this.kinet.animate("y", localY - (customSize ?? this.options.size) / 2);
+            this.kinet.animate(
+                "x",
+                localX - (customSize ?? this.options.size) / 2
+            );
+            this.kinet.animate(
+                "y",
+                localY - (customSize ?? this.options.size) / 2
+            );
 
             this.cursor_bg = this.options.bg;
         } else {
-
             this.magnet_effect = false;
 
             let element = this.focusedElement as HTMLElement;
@@ -235,9 +247,10 @@ export default class Cursora {
         ) as HTMLElement | null;
 
         if (element) {
-
             if (element.hasAttribute("data-cursora-background")) {
-                this.cursor_bg = element.getAttribute("data-cursora-background") as string;
+                this.cursor_bg = element.getAttribute(
+                    "data-cursora-background"
+                ) as string;
             }
 
             const { left, top } = element.getBoundingClientRect();
@@ -336,23 +349,33 @@ export default class Cursora {
         this.cursor.style.transition        = `background-color .1s`;
         this.cursor.style.borderRadius      = `${this.options.size / 2}`;
 
+        this.cursor.style.borderStyle       = "solid";
+        this.cursor.style.borderColor       = this.options.border.color;
+        this.cursor.style.borderWidth       = `${this.options.border.size}px`;
+
         if (this.options.invert)
             this.cursor.style.mixBlendMode  = 'difference';
     }
 
     private cursor_dot(hidden: boolean = false) {
-        this.globalStyles.innerHTML = '';
+        this.globalStyles.innerHTML = "";
 
-        const inheritCursorStyle = document.createTextNode('* { cursor: inherit; }');
+        const inheritCursorStyle = document.createTextNode(
+            "* { cursor: inherit; }"
+        );
         this.globalStyles.appendChild(inheritCursorStyle);
 
         if (!hidden) {
-          const dotSvgBase64 = btoa(this.dot());
-          const dotCursorStyle = document.createTextNode(`html { cursor: url(data:image/svg+xml;base64,${dotSvgBase64}) 4 4, auto; }`);
-          this.globalStyles.appendChild(dotCursorStyle);
+            const dotSvgBase64 = btoa(this.dot());
+            const dotCursorStyle = document.createTextNode(
+                `html { cursor: url(data:image/svg+xml;base64,${dotSvgBase64}) 4 4, auto; }`
+            );
+            this.globalStyles.appendChild(dotCursorStyle);
         } else {
-          const noneCursorStyle = document.createTextNode(`html { cursor: none; }`);
-          this.globalStyles.appendChild(noneCursorStyle);
+            const noneCursorStyle = document.createTextNode(
+                `html { cursor: none; }`
+            );
+            this.globalStyles.appendChild(noneCursorStyle);
         }
     }
 }
