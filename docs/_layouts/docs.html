@@ -2,12 +2,20 @@
 layout: docs
 ---
 
-<link href="../assets/css/docs.css">
-<link href="../assets/css/index.css">
+<link rel="stylesheet" href="../assets/css/docs.css">
+<link rel="stylesheet" href="../assets/css/index.css">
 
 {{ define "body_override" }}<body data-bs-spy="scroll" data-bs-target="#TableOfContents">{{ end }}
 {{ define "main" }}
   <div id="app">
+    <div class="bg"></div>
+    <a
+        data-cursora-radius="50"
+        href="."
+        class="z-40 absolute top-5 left-[50%] w-10 h-10"
+    >
+        <img id="logo" src="../icon.png" alt="logo" />
+    </a>
     <aside class="bd-sidebar">
       <div class="offcanvas-lg offcanvas-start" tabindex="-1" id="bdSidebar" aria-labelledby="bdSidebarOffcanvasLabel">
         <div class="offcanvas-header border-bottom">
@@ -52,5 +60,19 @@ layout: docs
         {{ Content }}
       </div>
     </main>
+    <script src="https://unpkg.com/cursor-cursora@latest/dist/index.js"></script>
+    <script>
+        new Cursora({
+            dot: "#fff",
+            bg: "rgba(255, 255, 255, .1)",
+            zIndex: 3,
+            hoverOffset: {
+                x: 10,
+                y: 10,
+            },
+        });
+    </script>
+
+    <script src="../index.js"></script>
   </div>
 {{ end }}
