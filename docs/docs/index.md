@@ -3,6 +3,8 @@ layout: docs
 title: Icons
 description: Homepage documentation for cursora
 group: extend
+title: Introduction
+toc: true
 ---
 
 # Cursora Library Documentation

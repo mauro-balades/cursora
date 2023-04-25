@@ -19,20 +19,11 @@ layout: docs
     >
         <img id="logo" src="../icon.png" alt="logo" />
     </a>
-    <aside class="bd-sidebar">
-      <div class="offcanvas-lg offcanvas-start" tabindex="-1" id="bdSidebar" aria-labelledby="bdSidebarOffcanvasLabel">
-        <div class="offcanvas-header border-bottom">
-          <h5 class="offcanvas-title" id="bdSidebarOffcanvasLabel">Browse docs</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close" data-bs-target="#bdSidebar"></button>
-        </div>
+    <aside>
 
-        <div class="offcanvas-body">
-        </div>
-      </div>
     </aside>
 
     <main class="bd-main order-1">
-      {{ if (eq Page.Params.toc true) }}
         <div class="bd-toc mt-3 mb-5 my-lg-0 mb-lg-5 px-sm-1 text-body-secondary">
           <button class="btn btn-link p-md-0 mb-2 mb-md-0 text-decoration-none bd-toc-toggle d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#tocContents" aria-expanded="false" aria-controls="tocContents">
             On this page
@@ -41,10 +32,9 @@ layout: docs
           <strong class="d-none d-md-block h6 my-2 ms-3">On this page</strong>
           <hr class="d-none d-md-block my-2 ms-3">
           <div class="collapse bd-toc-collapse" id="tocContents">
-            {{ TableOfContents }}
+            {% toc %}
           </div>
         </div>
-      {{ end }}
 
       <div class="bd-content ps-lg-2">
         {{ if Page.Params.sections }}
@@ -60,7 +50,7 @@ layout: docs
           </div>
         {{ end }}
 
-        {{ Content }}
+        {{ content | toc }}
       </div>
     </main>
     <script src="https://unpkg.com/cursor-cursora@latest/dist/index.js"></script>
