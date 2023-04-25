@@ -4,17 +4,19 @@ layout: docs
 
 <link rel="stylesheet" href="../assets/css/docs.css">
 <link rel="stylesheet" href="../assets/css/index.css">
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="shortcut icon" href="../icon.png" type="image/png" />
-<title>{{ title }}</title>
+<link rel="stylesheet" href="../assets/css/github-markdown.css">
 
-{{ define "body_override" }}<body data-bs-spy="scroll" data-bs-target="#TableOfContents">{{ end }}
-{{ define "main" }}
-  <div id="app">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="shortcut icon" href="../icon.png" type="image/png" />
+<title>{{ page.title }}</title>
+
+<body style="color-scheme: dark;">
+  <div id="app" class="text-white">
     <div class="bg"></div>
     <a
         data-cursora-radius="50"
-        href="."
+        href="/"
         class="z-40 absolute top-5 left-[50%] w-10 h-10"
     >
         <img id="logo" src="../icon.png" alt="logo" />
@@ -23,35 +25,49 @@ layout: docs
 
     </aside>
 
-    <main class="bd-main order-1">
-        <div class="bd-toc mt-3 mb-5 my-lg-0 mb-lg-5 px-sm-1 text-body-secondary">
-          <button class="btn btn-link p-md-0 mb-2 mb-md-0 text-decoration-none bd-toc-toggle d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#tocContents" aria-expanded="false" aria-controls="tocContents">
-            On this page
-            <svg class="bi d-md-none ms-2" aria-hidden="true"><use xlink:href="#chevron-expand"></use></svg>
-          </button>
-          <strong class="d-none d-md-block h6 my-2 ms-3">On this page</strong>
-          <hr class="d-none d-md-block my-2 ms-3">
-          <div class="collapse bd-toc-collapse" id="tocContents">
-            {% toc %}
-          </div>
+    <main class="z-20">
+      <div class="fixed text-white w-auto right-0 top-1/2 mr-20 font-semibold">
+        <div class="text-2xl mb-3 tracking-wide">
+          TABLE OF CONTENTS
         </div>
+        <div class="ml-1">
+          <style scoped>
+            li {
+              margin-top: 10px;
+              width: 100%;
+            }
 
-      <div class="bd-content ps-lg-2">
-        {{ if Page.Params.sections }}
-          <div class="row g-3">
-            {{ range Page.Params.sections }}
-            <div class="col-md-6">
-              <a class="d-block text-decoration-none" href="../{{ urlize .title }}/">
-                <strong class="d-block h5 mb-0">{{ title }}</strong>
-                <span class="text-secondary">{{ description }}</span>
-              </a>
-            </div>
-            {{ end }}
-          </div>
-        {{ end }}
-
-        {{ content | toc }}
+            li a {
+              width: 100%;
+              display: block;
+            }
+          </style>
+          {{ content | toc_only }}
+        </div>
       </div>
+      <div class="fixed text-white w-auto left-0 top-1/2 ml-10 font-semibold">
+        <div class="text-2xl mb-3 tracking-wide">
+          DOCUMENTATION PAGES
+        </div>
+        <div class="ml-1">
+          <ul class="w-72 relative">
+            <li class="w-full relative">
+              <a class="w-full block pl-2 py-1" data-cursora-radius="10" href="/docs/">
+                Introduction
+              </a>
+            </li>
+            <li class="w-full relative">
+              <a class="w-full block pl-2 py-1" data-cursora-radius="10" href="/docs/customization">
+                Customization
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <article class="markdown-body m-auto w-1/2 flex h-screen flex-col justify-center">
+        {{ content | inject_anchors }}
+      </article>
     </main>
     <script src="https://unpkg.com/cursor-cursora@latest/dist/index.js"></script>
     <script>
