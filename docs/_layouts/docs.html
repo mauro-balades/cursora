@@ -26,7 +26,7 @@ layout: docs
     </aside>
 
     <main class="z-20">
-      <div class="fixed text-white w-auto right-0 top-1/2 mr-20 font-semibold">
+      <div class="fixed text-white w-auto right-0 top-32 mr-20 font-semibold">
         <div class="text-2xl mb-3 tracking-wide">
           TABLE OF CONTENTS
         </div>
@@ -45,7 +45,7 @@ layout: docs
           {{ content | toc_only }}
         </div>
       </div>
-      <div class="fixed text-white w-auto left-0 top-1/2 ml-10 font-semibold">
+      <div class="fixed text-white w-auto left-0 top-32 ml-10 font-semibold">
         <div class="text-2xl mb-3 tracking-wide">
           DOCUMENTATION PAGES
         </div>
@@ -58,14 +58,19 @@ layout: docs
             </li>
             <li class="w-full relative">
               <a class="w-full block pl-2 py-1" data-cursora-radius="10" href="/docs/customization">
-                Customization
+                Basic customization
+              </a>
+            </li>
+            <li class="w-full relative">
+              <a class="w-full block pl-2 py-1" data-cursora-radius="10" href="/docs/advanced-customization">
+                Advanced customization
               </a>
             </li>
           </ul>
         </div>
       </div>
 
-      <article class="markdown-body m-auto w-1/2 flex h-screen flex-col justify-center">
+      <article class="markdown-body m-auto w-1/2 flex flex-col pt-32 pb-10 h-fit">
         {{ content | inject_anchors }}
       </article>
     </main>
