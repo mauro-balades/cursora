@@ -254,7 +254,9 @@ export default class Cursora {
                 ) as string;
             }
 
-            const { left, top } = element.getBoundingClientRect();
+            const { left: eleft, top: etop } = element.getBoundingClientRect();
+            const left = eleft + window.scrollX;
+            const top = etop + window.scrollY;
 
             let radius_attr = element.getAttribute("data-cursora-radius");
             let radius = radius_attr
